@@ -1,12 +1,14 @@
 package boletamaster.tiquetes;
 import java.util.UUID;
+import java.io.Serializable;
+
 import java.time.LocalDateTime;
 import boletamaster.eventos.Evento;
 import boletamaster.usuarios.Usuario;
 import boletamaster.eventos.Localidad;
 import boletamaster.eventos.Oferta;
 
-public abstract class Ticket {
+public abstract class Ticket implements Serializable{
     protected final String id;
     protected Evento evento;
     
@@ -16,7 +18,9 @@ public abstract class Ticket {
     protected final double porcentajeServicio;
     protected final double cuotaFija;
     protected TicketEstado estado;
-    public Usuario propietario; // null si no vendido
+    public Usuario propietario;
+    private static final long serialVersionUID = 1L;
+    // null si no vendido
     // referencia al evento asociado 
 
     public Ticket(Evento evento, Localidad localidad, double precioBase, double porcentajeServicio, double cuotaFija) {

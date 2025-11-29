@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import boletamaster.tiquetes.Ticket;
 import boletamaster.usuarios.Usuario;
+import java.io.Serializable;
 
-public class Oferta {
+public class Oferta implements Serializable {
     private final String id;
     private final Ticket ticket;
     private final Usuario vendedor;
@@ -14,6 +15,8 @@ public class Oferta {
     private boolean activa;
     private final LocalDateTime fechaCreacion;
     private final List<ContraOferta> contraOfertas;
+    private static final long serialVersionUID = 1L;
+
 
     // Resale Constructor (uses specific Ticket and price)
     public Oferta(Ticket ticket, Usuario vendedor, double precioPublico) {

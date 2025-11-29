@@ -1,13 +1,15 @@
 package boletamaster.marketplace;
 
 import java.time.LocalDateTime;
+import java.io.Serializable;
 
-public class LogRegistro {
+public class LogRegistro implements Serializable{
     private final LocalDateTime fechaHora;
-    private final String tipoAccion; // NEW: Specifies the event type (e.g., "OFERTA_CREADA")
+    private final String tipoAccion; 
     private final String descripcion;
 
-    // Updated Constructor to include the action type
+    private static final long serialVersionUID = 1L;
+    
     public LogRegistro(String tipoAccion, String descripcion) {
         this.fechaHora = LocalDateTime.now();
         this.tipoAccion = tipoAccion;

@@ -13,95 +13,79 @@ import java.util.List;
 public class MainAdministrador {
 
     public static void main(String[] args) {
-    	BoletamasterSystem core = BoletamasterSystem.getInstance();
-    	
+        BoletamasterSystem core = BoletamasterSystem.getInstance();
         Sistema sistema = new Sistema(core);
 
-        System.out.println("=== BoletaMaster - Interfaz Administrador ===");
-        String login = ConsoleUtils.readLine("Login");
-        String pass = ConsoleUtils.readPassword("Password");
+        while (true) {
+            System.out.println("\n=== BIENVENIDO A BOLETAMASTER (ADMIN) ===");
+            System.out.println("1. Iniciar Sesión");
+            System.out.println("2. Registrar Nuevo Administrador");
+            System.out.println("3. Salir");
+            
+            int opcion = ConsoleUtils.readInt("Seleccione una opción", 1, 3);
+            if (opcion == 3) return;
 
-        Usuario u = sistema.buscarUsuarioPorLogin(login);
-        if (u == null || !u.checkPassword(pass) || !(u instanceof Administrador)) {
-            System.out.println("Credenciales inválidas o no es administrador. Saliendo.");
-            return;
+            Administrador adminActual = null;
+
+            if (opcion == 1) {
+                String login = ConsoleUtils.readLine("Usuario");
+                String pass = ConsoleUtils.readPassword("Contraseña");
+                Usuario u = sistema.buscarUsuarioPorLogin(login);
+                if (u != null && u.checkPassword(pass) && u instanceof Administrador) {
+                    adminActual = (Administrador) u;
+                } else {
+                    System.out.println("Acceso denegado.");
+                }
+            } else if (opcion == 2) {
+                System.out.println("--- Crear Admin ---");
+                String login = ConsoleUtils.readLine("Usuario");
+                String pass = ConsoleUtils.readPassword("Contraseña");
+                String nombre = ConsoleUtils.readLine("Nombre");
+                adminActual = new Administrador(login, pass, nombre);
+                sistema.registrarUsuario(adminActual);
+                System.out.println("Admin creado.");
+            }
+
+            if (adminActual != null) {
+                menuAdmin(sistema, adminActual);
+            }
         }
+    }
 
-        Administrador admin = (Administrador) u;
-        Marketplace marketplace = new Marketplace(sistema);
+    private static void menuAdmin(Sistema sistema, Administrador admin) {
+        Marketplace marketplace = BoletamasterSystem.getInstance().getMarketplace();
 
         while (true) {
-            System.out.println("\n--- Menú Administrador ---");
-            System.out.println("1. Cancelar evento y realizar reembolsos");
-            System.out.println("2. Consultar log del Marketplace");
-            System.out.println("3. Eliminar Oferta de Marketplace (Discreción)"); // NEW OPTION
-            System.out.println("4. Ver ganancias generales");
-            System.out.println("5. Salir");
+            System.out.println("\n--- MENÚ ADMIN (" + admin.getNombre() + ") ---");
+            System.out.println("1. Cancelar evento y reembolsar");
+            System.out.println("2. Ver Log del Marketplace");
+            System.out.println("3. Eliminar Oferta Marketplace");
+            System.out.println("4. Cerrar Sesión");
 
-            int opt = ConsoleUtils.readInt("Opción", 1, 5);
+            int opt = ConsoleUtils.readInt("Opción", 1, 4);
             try {
                 switch (opt) {
                     case 1:
-                        String id = ConsoleUtils.readLine("Nombre del evento a cancelar");
-                        Evento e = buscarEventoPorNombre(sistema, id);
-                        if (e == null) {
-                            System.out.println("Evento no encontrado.");
-                        } else {
-                            List<Reembolso> reembolsos = sistema.cancelarEventoYReembolsar(e, admin);
-                            System.out.println("Evento cancelado. Se realizaron " + reembolsos.size() + " reembolsos.");
-                        }
+                        
+                        System.out.println("Funcionalidad pendiente de implementación UI completa.");
                         break;
                     case 2:
-                        consultarLog(sistema);
+                        List<LogRegistro> logs = sistema.getRepo().getLog();
+                        if (logs.isEmpty()) System.out.println("Log vacío.");
+                        for(LogRegistro l : logs) System.out.println(l);
                         break;
                     case 3:
-                        eliminarOfertaAdmin(marketplace, admin);
+                        String id = ConsoleUtils.readLine("ID Oferta a eliminar");
+                        try {
+                            marketplace.borrarOfertaPorAdmin(id, admin);
+                            System.out.println("Oferta eliminada.");
+                        } catch (Exception e) { System.out.println(e.getMessage()); }
                         break;
-                    case 4:
-                        double[] datos = admin.gananciasGenerales(sistema);
-                        System.out.println("Ventas totales: " + datos[0]);
-                        System.out.println("Ganancias plataforma: " + datos[1]);
-                        break;
-                    case 5:
-                        System.out.println("Sesión finalizada. Hasta luego.");
-                        return;
+                    case 4: return;
                 }
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
             }
         }
-    }
-
-    private static void consultarLog(Sistema sistema) {
-         List<LogRegistro> logs = sistema.getRepo().getLog();
-         if (logs == null || logs.isEmpty()) {
-             System.out.println("El log del Marketplace está vacío.");
-         } else {
-             System.out.println("\n--- Log de Actividades ---");
-             for (LogRegistro l : logs) {
-                 // Updated to show the new detailed log format
-                 System.out.println(l.toString()); 
-             }
-         }
-    }
-    
-    private static void eliminarOfertaAdmin(Marketplace marketplace, Administrador admin) {
-        String idOferta = ConsoleUtils.readLine("ID de la oferta a eliminar");
-        try {
-            marketplace.borrarOfertaPorAdmin(idOferta, admin);
-            System.out.println("Oferta " + idOferta + " eliminada por discreción administrativa.");
-        } catch (Exception e) {
-            System.out.println("Error al eliminar oferta: " + e.getMessage());
-        }
-    }
-
-    private static Evento buscarEventoPorNombre(Sistema sistema, String nombre) {
-        for (Object o : sistema.getRepo().getEventos()) {
-            if (o instanceof Evento) {
-                Evento e = (Evento) o;
-                if (e.getNombre().equalsIgnoreCase(nombre)) return e;
-            }
-        }
-        return null;
     }
 }

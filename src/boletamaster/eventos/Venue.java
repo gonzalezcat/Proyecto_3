@@ -1,11 +1,13 @@
 package boletamaster.eventos;
+import java.io.Serializable;
 
-public class Venue {
+public class Venue implements Serializable {
     private final String id;
     private final String nombre;
     private final String ubicacion;
     private final int capacidadMaxima;
     private boolean aprobado;
+    private static final long serialVersionUID = 1L;
 
     public Venue(String id, String nombre, String ubicacion, int capacidadMaxima, boolean aprobado) {
         this.id = id;

@@ -7,8 +7,9 @@ import boletamaster.tiquetes.Ticket;
 import boletamaster.tiquetes.TicketSimple;
 import boletamaster.usuarios.Usuario;
 import boletamaster.eventos.Localidad;
+import java.io.Serializable;
 
-public class Oferta {
+public class Oferta implements Serializable{
 
     private final String id;
     private final Ticket ticket;
@@ -20,8 +21,9 @@ public class Oferta {
     private final LocalDateTime fin;
     private final double porcentajeDescuento;
     private final List<ContraOferta> contraOfertas;
+    private static final long serialVersionUID = 1L;
 
-    // Constructor usado por MarketplaceUI con Ticket y vendedor
+   
     public Oferta(Ticket ticket, Usuario vendedor, double precioPublico,
                   double porcentajeDescuento, LocalDateTime inicio, LocalDateTime fin) {
         this.id = java.util.UUID.randomUUID().toString();

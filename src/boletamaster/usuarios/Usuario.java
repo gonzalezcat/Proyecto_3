@@ -1,13 +1,14 @@
 package boletamaster.usuarios;
-
+import java.io.Serializable;
 import java.util.UUID;
 
-public abstract class Usuario {
+public abstract class Usuario implements Serializable {
     protected final String id;
     protected final String login;
     protected String password;
     protected String nombre;
     protected double saldo; // reembolsos
+    private static final long serialVersionUID = 1L;
 
     public Usuario(String login, String password, String nombre) {
         this.id = UUID.randomUUID().toString();

@@ -2,8 +2,12 @@ package logica;
 
 import boletamaster.persistence.SimpleRepository;
 import boletamaster.marketplace.Marketplace;
-import boletamaster.tiquetes.*;
-import boletamaster.transacciones.*;
+import boletamaster.tiquetes.TicketDeluxe;
+import boletamaster.tiquetes.TicketMultiple;
+import boletamaster.tiquetes.TicketNumerado;
+import boletamaster.tiquetes.TicketSimple;
+import boletamaster.transacciones.Compra;
+import boletamaster.transacciones.Reembolso;
 import boletamaster.usuarios.*;
 import boletamaster.eventos.*;
 

@@ -3,14 +3,16 @@ package boletamaster.eventos;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.io.Serializable;
 
-public class Localidad {
+public class Localidad implements Serializable{
     private final String id;
     private final String nombre;
     private final double precioBase;
     private final int capacidad;
     private final boolean numerada;
     private final List<String> asientosNumerados; // ids o etiquetas de asientos
+    private static final long serialVersionUID = 1L;
 
     public Localidad(String id, String nombre, double precioBase, int capacidad, boolean numerada) {
         this.id = id;

@@ -1,12 +1,14 @@
 package boletamaster.eventos;
 
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import boletamaster.usuarios.Organizador;
 import boletamaster.tiquetes.Ticket;
+import java.io.Serializable;
 
-public class Evento {
+public class Evento implements Serializable {
     private final String id;
     private final String nombre;
     private final LocalDateTime fechaHora;
@@ -14,8 +16,9 @@ public class Evento {
     private final Organizador organizador;
     private final List<Localidad> localidades;
     private final List<Ticket> tickets;
-    private final List<Oferta> ofertas; // ✅ agregado
+    private final List<Oferta> ofertas; //
     private boolean cancelado;
+    private static final long serialVersionUID = 1L;
 
     public Evento(String id, String nombre, LocalDateTime fechaHora, Venue venue, Organizador organizador) {
         this.id = id;

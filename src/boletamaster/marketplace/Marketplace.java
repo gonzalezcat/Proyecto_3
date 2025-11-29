@@ -6,11 +6,13 @@ import boletamaster.app.Sistema;
 import boletamaster.tiquetes.*;
 import boletamaster.usuarios.*;
 import boletamaster.marketplace.Oferta.ContraOferta;
+import java.io.Serializable;
 
-public class Marketplace {
+public class Marketplace implements Serializable{
     private final Sistema sistema;
     private final List<Oferta> ofertas;
-    
+    private static final long serialVersionUID = 1L;
+
     public Marketplace(Sistema sistema) {
         this.sistema = sistema;
         // Load offers from the repository on startup

@@ -1,13 +1,13 @@
 package boletamaster.eventos;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 import boletamaster.tiquetes.Ticket;
 import boletamaster.tiquetes.TicketSimple;
 import boletamaster.usuarios.Usuario;
-import boletamaster.eventos.Localidad;
-import java.io.Serializable;
 
 public class Oferta implements Serializable{
 
@@ -52,7 +52,6 @@ public class Oferta implements Serializable{
         this.contraOfertas = new ArrayList<>();
     }
 
-    // ===== Getters y setters =====
     public String getId() { return id; }
     public Ticket getTicket() { return ticket; }
     public Usuario getVendedor() { return vendedor; }
@@ -67,7 +66,6 @@ public class Oferta implements Serializable{
         contraOfertas.add(co);
     }
 
-    // ===== Métodos para MarketplaceUI =====
     public Localidad getLocalidad() {
         return ticket.getLocalidad();
     }
@@ -85,7 +83,6 @@ public class Oferta implements Serializable{
         return precio * (1.0 - porcentajeDescuento);
     }
 
-    // ===== Clase interna para contraofertas =====
     public static class ContraOferta {
         private final Usuario comprador;
         private final double precio;

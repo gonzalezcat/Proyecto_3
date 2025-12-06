@@ -1,19 +1,26 @@
 package logica;
 
-import boletamaster.usuarios.*;
+import boletamaster.app.Sistema;
+import boletamaster.usuarios.Usuario;
 import boletamaster.transacciones.Reembolso;
 import boletamaster.tiquetes.*;
 
 public class GestorReembolsos {
     
+    private final Sistema sistema; 
+
+    public GestorReembolsos(Sistema sistema) {
+        this.sistema = sistema;
+    }
+    
     public Reembolso procesarReembolsoCompleto(Usuario usuario, double monto, String motivo) {
-        // Reembolso completo (menos costo emisión) - por cancelación administrativa
+        // ...
         usuario.depositarSaldo(monto);
         return new Reembolso(usuario, monto);
     }
     
+    
     public Reembolso procesarReembolsoParcial(Usuario usuario, double montoBase, String motivo) {
-        // Reembolso solo del precio base - por cancelación de organizador
         usuario.depositarSaldo(montoBase);
         return new Reembolso(usuario, montoBase);
     }

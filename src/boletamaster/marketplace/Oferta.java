@@ -11,14 +11,13 @@ public class Oferta implements Serializable {
     private final String id;
     private final Ticket ticket;
     private final Usuario vendedor;
-    private double precioPublico; // Initial asking price
+    private double precioPublico; 
     private boolean activa;
     private final LocalDateTime fechaCreacion;
     private final List<ContraOferta> contraOfertas;
     private static final long serialVersionUID = 1L;
 
 
-    // Resale Constructor (uses specific Ticket and price)
     public Oferta(Ticket ticket, Usuario vendedor, double precioPublico) {
         this.id = java.util.UUID.randomUUID().toString();
         this.ticket = ticket;
@@ -29,7 +28,6 @@ public class Oferta implements Serializable {
         this.contraOfertas = new ArrayList<>();
     }
 
-    // --- Getters and Setters ---
     public String getId() { return id; }
     public Ticket getTicket() { return ticket; }
     public Usuario getVendedor() { return vendedor; }
@@ -43,18 +41,14 @@ public class Oferta implements Serializable {
         contraOfertas.add(co);
     }
     
-    /**
-     * Returns the price that must be accepted/paid (initial price or latest counteroffer).
-     */
+    
     public double getPrecioActual() {
         if (!contraOfertas.isEmpty()) {
-            // Return the price of the last counteroffer
             return contraOfertas.get(contraOfertas.size() - 1).getPrecio();
         }
         return precioPublico;
     }
 
-    // --- ContraOferta Inner Class ---
     public static class ContraOferta {
         private final Usuario comprador;
         private final double precio;

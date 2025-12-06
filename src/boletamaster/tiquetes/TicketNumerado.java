@@ -3,6 +3,7 @@ import boletamaster.eventos.Evento;
 import boletamaster.eventos.Localidad;
 
 public class TicketNumerado extends Ticket {
+	private static final long serialVersionUID = 1L;
     private final String asiento;
     
    

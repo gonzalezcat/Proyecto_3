@@ -1,13 +1,15 @@
 package boletamaster.tiquetes;
-import boletamaster.eventos.Evento;
-import boletamaster.eventos.Localidad;
 import java.util.ArrayList;
 import java.util.List;
+
+import boletamaster.eventos.Evento;
+import boletamaster.eventos.Localidad;
 import boletamaster.usuarios.Usuario;
 
 public class TicketMultiple extends Ticket {
-    private final List<Ticket> elementos; // tickets que componen el paquete
-    private boolean paqueteTransferido; // si se ha transferido el paquete
+	private static final long serialVersionUID = 1L;
+    private final List<Ticket> elementos; 
+    private boolean paqueteTransferido; 
 
     public TicketMultiple(Evento evento, Localidad localidad, double precioBase, 
             double porcentajeServicio, double cuotaFija) {
@@ -46,9 +48,7 @@ public class TicketMultiple extends Ticket {
         this.paqueteTransferido = true;
     }
 
-    /**
-     *cantidad ind. q hay en el paquete
-     */
+   
     public int ticketsMultiples() {
         return elementos.size();
     }

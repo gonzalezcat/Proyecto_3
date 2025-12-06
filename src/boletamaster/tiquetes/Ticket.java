@@ -1,12 +1,12 @@
 package boletamaster.tiquetes;
-import java.util.UUID;
 import java.io.Serializable;
-
 import java.time.LocalDateTime;
+import java.util.UUID;
+
 import boletamaster.eventos.Evento;
-import boletamaster.usuarios.Usuario;
 import boletamaster.eventos.Localidad;
 import boletamaster.eventos.Oferta;
+import boletamaster.usuarios.Usuario;
 
 public abstract class Ticket implements Serializable{
     protected final String id;
@@ -20,12 +20,11 @@ public abstract class Ticket implements Serializable{
     protected TicketEstado estado;
     public Usuario propietario;
     private static final long serialVersionUID = 1L;
-    // null si no vendido
-    // referencia al evento asociado 
+    protected boolean impreso = false;
 
     public Ticket(Evento evento, Localidad localidad, double precioBase, double porcentajeServicio, double cuotaFija) {
     	this.id = UUID.randomUUID().toString();
-        this.evento = evento;           // ✅ INICIALIZAR evento
+        this.evento = evento;           
         this.localidad = localidad;
         this.precioBase = precioBase;
         this.porcentajeServicio = porcentajeServicio;
@@ -86,10 +85,19 @@ public abstract class Ticket implements Serializable{
         return precioFinal();
     }
     
+    public boolean isImpreso() {
+        return impreso;
+    }
 
-    /**
-     * Un ticket esta vencido si el evento ya fue
-     */
+    public void marcarComoImpreso() {
+        if (this.impreso) {
+            throw new IllegalStateException("El ticket ya ha sido marcado como impreso.");
+        }
+        this.impreso = true;
+        
+    }
+
+    
     public boolean ticketVencido() {
         if (evento == null) return false;
         LocalDateTime ahora = LocalDateTime.now();
@@ -100,4 +108,8 @@ public abstract class Ticket implements Serializable{
     public String toString() {
         return "Ticket{" + id + ", precioBase=" + precioBase + ", estado=" + estado + ", propietario=" + (propietario!=null?propietario.getLogin():"-") + "}";
     }
+
+
+
+
 }

@@ -1,54 +1,67 @@
 package boletamaster.app;
-
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import boletamaster.eventos.Evento;
+import boletamaster.eventos.Localidad;
+import boletamaster.eventos.Venue;
 import boletamaster.persistence.SimpleRepository;
-import boletamaster.eventos.*;
-import boletamaster.tiquetes.*;
-import boletamaster.transacciones.*;
-import boletamaster.usuarios.*;
+import boletamaster.tiquetes.Ticket;
+import boletamaster.tiquetes.TicketDeluxe;
+import boletamaster.tiquetes.TicketEstado;
+import boletamaster.tiquetes.TicketMultiple;
+import boletamaster.transacciones.Compra;
+import boletamaster.transacciones.Reembolso;
+import boletamaster.usuarios.Administrador;
+import boletamaster.usuarios.Comprador;
+import boletamaster.usuarios.Organizador;
+import boletamaster.usuarios.Usuario;
 import logica.BoletamasterSystem;
 
 public class Sistema {
 
     private final BoletamasterSystem core;
 
-    // --- CRITICAL FIX: Constructor now takes the core system instance ---
     public Sistema(BoletamasterSystem core) {
         if (core == null) throw new IllegalArgumentException("Core system cannot be null.");
         this.core = core;
     }
-    // -------------------------------------------------------------------
 
-    // ===== Usuarios =====
-    public void registrarUsuario(Usuario u) {
-        core.registrarUsuario(u);
+   
+    public void registrarUsuario(String login, String password, String nombre, String tipo) {
+        if ("Comprador".equalsIgnoreCase(tipo)) {
+             core.getGestorUsuarios().registrarComprador(login, password, nombre);
+        } else if ("Organizador".equalsIgnoreCase(tipo)) {
+             core.getGestorUsuarios().registrarOrganizador(login, password, nombre);
+        } else if ("Administrador".equalsIgnoreCase(tipo)) {
+             core.getGestorUsuarios().registrarAdministrador(login, password, nombre);
+        } else {
+             throw new IllegalArgumentException("Tipo de usuario inválido.");
+        }
     }
+    
 
     public Usuario buscarUsuarioPorLogin(String login) {
-        return core.buscarUsuario(login);
+        return core.getGestorUsuarios().buscarUsuarioPorLogin(login).orElse(null);
     }
+    
 
-    // ===== Venues y Eventos =====
     public void registrarVenue(Venue v) {
-        core.agregarVenue(v);
+        core.getGestorEventos().agregarVenue(v);
     }
-
-    public void registrarEvento(Evento e) {
-        core.agregarEvento(e);
+    
+    public Evento registrarEvento(Organizador organizador, String nombre, 
+                                LocalDateTime fecha, Venue venue) {
+        return core.getGestorEventos().crearEvento(organizador, nombre, fecha, venue);
     }
-
+    
     public List<Evento> eventosActivosPorOrganizador(Organizador org) {
-        List<Evento> resultado = new ArrayList<>();
-        for (Evento e : core.getEventos()) {
-            if (e.getOrganizador().equals(org)) resultado.add(e);
-        }
-        return resultado;
+        return core.getGestorEventos().getEventosPorOrganizador(org); 
     }
 
-    // ===== Tickets =====
     public Ticket generarTicketSimple(Localidad loc) {
         return core.getGestorTiquetes().crearTicketSimple(loc);
     }
@@ -65,7 +78,6 @@ public class Sistema {
         return core.getGestorTiquetes().crearTicketDeluxe(loc);
     }
 
-    // ===== Compras y Transferencias =====
     public Compra comprarTicket(Usuario comprador, Ticket t) {
         if (!(comprador instanceof Comprador)) 
             throw new IllegalArgumentException("El usuario no es un comprador válido");
@@ -76,9 +88,9 @@ public class Sistema {
         core.getGestorVentas().transferirTicket(t, actual, password, nuevo);
     }
 
-    // ===== Cancelación de eventos y reembolsos =====
     public List<Reembolso> cancelarEventoYReembolsar(Evento e, Administrador admin) {
         List<Reembolso> resultado = new ArrayList<>();
+        // ... (Lógica de reembolso se mantiene) ...
         for (Ticket t : core.getRepo().getTickets()) {
             if (t.getEvento() != null && t.getEvento().equals(e) && t.getPropietario() != null) {
                 // Calculation of refund amount (precio base + service fee)
@@ -93,17 +105,14 @@ public class Sistema {
         return resultado;
     }
 
-    // ===== Reportes =====
     public void reporteFinancieroPorOrganizador(Organizador org) {
         core.getReporteador().generarReportePorOrganizador(org);
     }
 
-    // ===== Repositorio =====
     public SimpleRepository getRepo() {
         return core.getRepo();
     }
 
-    // ===== Configuración global =====
     public void setCuotaFijaGlobal(double cuotaFijaGlobal) {
         core.getGestorFinanzas().setCuotaFijaGlobal(cuotaFijaGlobal);
     }
@@ -115,7 +124,7 @@ public class Sistema {
     public Localidad buscarLocalidad(String nombre) {
         if (nombre == null || nombre.isEmpty()) return null;
 
-        for (Evento e : core.getEventos()) {
+        for (Evento e : core.getGestorEventos().getEventos()) { 
             for (Localidad loc : e.getLocalidades()) { 
                 if (loc.getNombre().equalsIgnoreCase(nombre)) {
                     return loc;
@@ -125,31 +134,36 @@ public class Sistema {
         return null; 
     }
 
-    public List<Ticket> obtenerTicketsPorPropietario(Comprador cliente) {
-        List<Ticket> ticketsDelCliente = new ArrayList<>();
+    public Evento buscarEventoPorIdYOrganizador(String idEvento, Organizador org) {
         
-        for (Object o : core.getRepo().getTickets()) {
-            if (!(o instanceof Ticket)) continue;
-            
-            Ticket t = (Ticket) o;
-            
-            if (t.getPropietario() != null && t.getPropietario().getLogin().equals(cliente.getLogin())) {
-                ticketsDelCliente.add(t);
-            }
-        }
-        return ticketsDelCliente;
-    }
-
-    public Ticket buscarTicketGlobalPorId(String idTicket) {
-        for (Object o : core.getRepo().getTickets()) {
-            if (!(o instanceof Ticket)) continue;
-            
-            Ticket t = (Ticket) o;
-            
-            if (t.getId().equals(idTicket)) {
-                return t;
+        for (Evento e : core.getGestorEventos().getEventosPorOrganizador(org)) {
+            if (e.getId().equals(idEvento)) {
+                return e;
             }
         }
         return null; 
+    }
+    public List<Ticket> obtenerTicketsPorPropietario(Comprador comprador) {
+        if (comprador == null) {
+            return Collections.emptyList();
+        }
+        return core.getRepo().getTickets().stream()
+                .filter(t -> t.getPropietario() != null && t.getPropietario().equals(comprador))
+                .collect(Collectors.toList());
+    }
+    
+    public Ticket buscarTicketGlobalPorId(String idTicket) {
+        if (idTicket == null || idTicket.isEmpty()) {
+            return null;
+        }
+        return core.getRepo().getTickets().stream()
+                .filter(t -> t.getId().equals(idTicket))
+                .findFirst()
+                .orElse(null);
+    }
+    
+    
+    public BoletamasterSystem getCore() {
+        return core;
     }
 }

@@ -1,5 +1,6 @@
 package logica;
 
+import boletamaster.app.Sistema; 
 import java.io.*;
 import java.util.List;
 import boletamaster.eventos.*;
@@ -7,7 +8,14 @@ import boletamaster.transacciones.*;
 import boletamaster.usuarios.*;
 
 public class GestorPersistencia {
+    
+    private final Sistema sistema; 
     private static final String CARPETA_DATOS = "data/";
+    
+    public GestorPersistencia(Sistema sistema) {
+        this.sistema = sistema;
+    }
+    
     
     public void guardarUsuarios(List<Usuario> usuarios) {
         guardarObjeto(usuarios, "usuarios.dat");
@@ -31,8 +39,8 @@ public class GestorPersistencia {
              new FileInputStream(CARPETA_DATOS + archivo))) {
             return (T) ois.readObject();
         } catch (Exception e) {
-            System.err.println("Error cargando datos desde " + archivo + ": " + e.getMessage());
-            return null;
+            System.err.println("Error cargando datos desde " + archivo + ": " + e.getMessage()); 
+            return null; 
         }
     }
     
@@ -43,7 +51,6 @@ public class GestorPersistencia {
             oos.writeObject(objeto);
         } catch (IOException e) {
             System.err.println("Error guardando datos en " + archivo + ": " + e.getMessage());
-           
         }
     }
     

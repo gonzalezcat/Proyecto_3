@@ -17,7 +17,6 @@ public class GestorFinanzas {
         sistema.getRepo().addTransaccion(transaccion);
     }
 
-    // ===== Configuración global =====
     public void setCuotaFijaGlobal(double cuotaFijaGlobal) {
         if (cuotaFijaGlobal < 0) throw new IllegalArgumentException("Cuota fija inválida");
         this.cuotaFijaGlobal = cuotaFijaGlobal;

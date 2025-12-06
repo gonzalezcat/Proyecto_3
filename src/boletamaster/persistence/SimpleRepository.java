@@ -1,15 +1,18 @@
 package boletamaster.persistence;
 
 import java.io.Serializable;
-import java.util.*;
-import boletamaster.usuarios.*;
-import boletamaster.eventos.*;
-import boletamaster.tiquetes.*;
-import boletamaster.transacciones.*;
+import java.util.List;
+
+import boletamaster.eventos.Evento;
+import boletamaster.eventos.Venue;
 import boletamaster.marketplace.LogRegistro;
 import boletamaster.marketplace.Oferta;
+import boletamaster.tiquetes.Ticket;
+import boletamaster.usuarios.Usuario;
 
 public class SimpleRepository implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 
     private final List<Usuario> usuarios;
     private final List<Venue> venues;
@@ -29,7 +32,6 @@ public class SimpleRepository implements Serializable {
         this.log = DataManager.cargarLista(PersistenceConfig.LOG_FILE);
     }
 
-    // --- Getters ---
     public List<Usuario> getUsuarios() { return usuarios; }
     public List<Venue> getVenues() { return venues; }
     public List<Evento> getEventos() { return eventos; }

@@ -11,7 +11,7 @@ public class Localidad implements Serializable{
     private final double precioBase;
     private final int capacidad;
     private final boolean numerada;
-    private final List<String> asientosNumerados; // ids o etiquetas de asientos
+    private final List<String> asientosNumerados; 
     private static final long serialVersionUID = 1L;
 
     public Localidad(String id, String nombre, double precioBase, int capacidad, boolean numerada) {
@@ -23,7 +23,6 @@ public class Localidad implements Serializable{
         this.asientosNumerados = numerada ? new ArrayList<>() : null;
     }
 
-    //metodos
     
     public String getId() { return id; }
     public String getNombre() { return nombre; }

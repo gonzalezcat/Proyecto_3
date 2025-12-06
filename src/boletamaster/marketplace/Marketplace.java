@@ -15,25 +15,19 @@ public class Marketplace implements Serializable{
 
     public Marketplace(Sistema sistema) {
         this.sistema = sistema;
-        // Load offers from the repository on startup
+        
         this.ofertas = sistema.getRepo().getOfertas(); 
     }
 
     public List<Oferta> getOfertas() { return ofertas; }
     
-    // Updated Log Registration
     private void registrarLog(String tipoAccion, String detalles) {
         LogRegistro r = new LogRegistro(tipoAccion, detalles);
         sistema.getRepo().addLog(r); // Persist the log
     }
 
-    // --- Core Marketplace Methods ---
-
-    /**
-     * Client publishes a specific ticket for sale.
-     */
+    
     public Oferta publicarOfertaResale(Ticket ticket, Usuario vendedor, double precioVenta) {
-        // 1. Validation Checks (Non-Deluxe/Non-Multiple)
         if (ticket == null || vendedor == null || precioVenta <= 0) {
             throw new IllegalArgumentException("Datos de oferta inválidos.");
         }
@@ -54,9 +48,7 @@ public class Marketplace implements Serializable{
         return nuevaOferta;
     }
 
-    /**
-     * Requirement: A client can delete their own offer.
-     */
+    
     public void borrarOfertaPorCliente(String ofertaId, Usuario cliente) {
         Oferta oferta = buscarOfertaActiva(ofertaId);
         
@@ -72,9 +64,7 @@ public class Marketplace implements Serializable{
                                    cliente.getLogin(), ofertaId, oferta.getTicket().getId()));
     }
 
-    /**
-     * Requirement: Buyers can counteroffer.
-     */
+    
     public void hacerContraOferta(String ofertaId, Usuario comprador, double precioPropuesto) {
         Oferta oferta = buscarOfertaActiva(ofertaId);
         
@@ -94,9 +84,7 @@ public class Marketplace implements Serializable{
                                    comprador.getLogin(), precioPropuesto, ofertaId));
     }
 
-    /**
-     * Requirement: Seller accepts a counteroffer, finalizing the sale (Transaction).
-     */
+    
     public void aceptarOfertaOContraOferta(String ofertaId, Usuario vendedor, String password) {
         Oferta oferta = buscarOfertaActiva(ofertaId);
         Ticket ticket = oferta.getTicket();
@@ -106,7 +94,6 @@ public class Marketplace implements Serializable{
             throw new IllegalStateException("Credenciales o propiedad de oferta incorrectas.");
         }
         
-        // Find the buyer (latest counteroffer)
         Usuario comprador;
         if (oferta.getContraOfertas().isEmpty()) {
             throw new IllegalStateException("No hay contraofertas para aceptar. Use un método de 'Comprar ahora' si aplica.");
@@ -114,21 +101,20 @@ public class Marketplace implements Serializable{
             comprador = oferta.getContraOfertas().get(oferta.getContraOfertas().size() - 1).getComprador();
         }
 
-        // Financial Transaction
         try {
-            // Note: The system assumes the final price is transferred directly between users.
+            
             comprador.descontarSaldo(precioFinal);
             vendedor.depositarSaldo(precioFinal);
         } catch (IllegalStateException e) {
             throw new IllegalStateException("Transacción fallida: Saldo insuficiente del comprador.");
         }
 
-        // Ticket Status Update
+
         ticket.propietario = comprador;
         ticket.setEstado(TicketEstado.TRANSFERIDO);
         oferta.setActiva(false); 
         
-        // Persist all changes
+
         sistema.getRepo().addOferta(oferta); 
         sistema.getRepo().addTicket(ticket);
         sistema.getRepo().addUsuario(comprador);
@@ -139,9 +125,6 @@ public class Marketplace implements Serializable{
                                    ticket.getId(), vendedor.getLogin(), comprador.getLogin(), precioFinal));
     }
 
-    /**
-     * Administrator can delete any published offer.
-     */
     public void borrarOfertaPorAdmin(String ofertaId, Administrador admin) {
         Oferta oferta = buscarOfertaActiva(ofertaId);
         
@@ -153,7 +136,6 @@ public class Marketplace implements Serializable{
                                    admin.getLogin(), ofertaId, oferta.getVendedor().getLogin()));
     }
 
-    // Helper method
     private Oferta buscarOfertaActiva(String id) {
         return ofertas.stream()
                       .filter(o -> o.getId().equals(id) && o.isActiva())
@@ -161,7 +143,6 @@ public class Marketplace implements Serializable{
                       .orElseThrow(() -> new IllegalArgumentException("Oferta no activa o inexistente."));
     }
     
-    // Helper method for listing
     public List<Oferta> listarOfertasVigentes() {
         return ofertas.stream()
                       .filter(Oferta::isActiva)

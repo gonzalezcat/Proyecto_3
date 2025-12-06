@@ -20,7 +20,6 @@ public class Reporteador {
         this.gestorFinanzas = gestorFinanzas;
     }
 
-    // ===== Reporte por organizador =====
     public Map<String, Object> generarReportePorOrganizador(Organizador org) {
         Map<String, Object> reporte = new HashMap<>();
         double total = 0.0;
@@ -42,7 +41,6 @@ public class Reporteador {
         return reporte;
     }
 
-    // ===== Reporte por administrador =====
     public Map<String, Object> generarReporteAdministrador(LocalDateTime inicio, LocalDateTime fin) {
         Map<String, Object> reporte = new HashMap<>();
         double total = 0.0;

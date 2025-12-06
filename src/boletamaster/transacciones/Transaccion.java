@@ -1,9 +1,8 @@
 package boletamaster.transacciones;
 import java.io.Serializable;
-
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+
 import boletamaster.usuarios.Usuario;
 
 public abstract class Transaccion implements Serializable {

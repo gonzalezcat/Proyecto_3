@@ -1,18 +1,18 @@
 package logica;
-
-import boletamaster.persistence.SimpleRepository;
-import boletamaster.marketplace.Marketplace;
-import boletamaster.tiquetes.TicketDeluxe;
-import boletamaster.tiquetes.TicketMultiple;
-import boletamaster.tiquetes.TicketNumerado;
-import boletamaster.tiquetes.TicketSimple;
-import boletamaster.transacciones.Compra;
-import boletamaster.transacciones.Reembolso;
-import boletamaster.usuarios.*;
-import boletamaster.eventos.*;
-
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import boletamaster.app.Sistema;
+import boletamaster.eventos.Evento;
+import boletamaster.eventos.Localidad;
+import boletamaster.eventos.Venue;
+import boletamaster.marketplace.Marketplace;
+import boletamaster.persistence.SimpleRepository;
+import boletamaster.tiquetes.Ticket;
+import boletamaster.usuarios.Comprador;
+import boletamaster.usuarios.Organizador;
 
 public class BoletamasterSystem {
 
@@ -20,93 +20,144 @@ public class BoletamasterSystem {
 
     private final SimpleRepository repo;
     private final Marketplace marketplace;
+    
     private final GestorFinanzas gestorFinanzas;
     private final GestorVentas gestorVentas;
     private final GestorTiquetes gestorTiquetes;
     private final Reporteador reporteador;
-    // NOTE: If you add GestorUsuarios here later, update this file!
-    // private final GestorUsuarios gestorUsuarios;
-
-    private final List<Evento> eventos;
-    private final List<Venue> venues;
-    private final List<Usuario> usuarios;
-
-    private boolean testingMode = false;
-
+    private final GestorUsuarios gestorUsuarios;
+    private final GestorEventos gestorEventos;
+    private final GestorPersistencia gestorPersistencia;
+    private final GestorReembolsos gestorReembolsos;    
+ 
     private BoletamasterSystem() {
         this.repo = new SimpleRepository();
 
-        // --- CRITICAL FIX: Pass 'this' to the Sistema constructor ---
-        // This breaks the infinite loop because 'Sistema' no longer calls getInstance().
-        boletamaster.app.Sistema facade = new boletamaster.app.Sistema(this);
-
+        Sistema facade = new Sistema(this);
+        this.gestorPersistencia = new GestorPersistencia(facade);
         this.marketplace = new Marketplace(facade);
         this.gestorFinanzas = new GestorFinanzas(facade);
-        // FIX: Removed the extraneous 'marketplace' argument from GestorVentas (now only 2 args)
-        this.gestorVentas = new GestorVentas(facade, gestorFinanzas); 
+        this.gestorVentas = new GestorVentas(facade, gestorFinanzas);
         this.gestorTiquetes = new GestorTiquetes(facade);
         this.reporteador = new Reporteador(facade, gestorFinanzas);
+        
+        this.gestorEventos = new GestorEventos(facade); 
+        this.gestorReembolsos = new GestorReembolsos(facade); 
+        this.gestorUsuarios = new GestorUsuarios(facade); 
 
-        // NOTE: These should ideally load data, but per your request, they remain empty Array Lists
-        this.eventos = new ArrayList<>();
-        this.venues = new ArrayList<>();
-        this.usuarios = new ArrayList<>();
-        // If you were using GestorUsuarios, you'd initialize it here:
-        // this.gestorUsuarios = new GestorUsuarios(this.usuarios); 
+        
     }
 
     public static BoletamasterSystem getInstance() {
-        if (instance == null) instance = new BoletamasterSystem();
+        if (instance == null) {
+             instance = new BoletamasterSystem();
+        }
         return instance;
     }
 
-    public static void resetInstance() { instance = null; }
-
-    // ===== Usuarios (If not using GestorUsuarios) =====
-    public void registrarUsuario(Usuario u) {
-        if (u == null) throw new IllegalArgumentException("Usuario nulo");
-        usuarios.add(u);
-        repo.addUsuario(u);
+    public static void resetInstance() { 
+        instance = null; 
     }
 
-    public Usuario buscarUsuario(String login) {
-        for (Usuario u : usuarios)
-            if (u.getLogin().equals(login)) return u;
-        return null;
-    }
-
-    // ===== Venues y eventos =====
-    public void agregarVenue(Venue v) {
-        if (v == null) throw new IllegalArgumentException("Venue nulo");
-        venues.add(v);
-        repo.addVenue(v);
-    }
-
-    public void agregarEvento(Evento e) {
-        if (e == null) throw new IllegalArgumentException("Evento nulo");
-        eventos.add(e);
-        repo.addEvento(e);
-    }
-
-    public List<Evento> getEventos() { return new ArrayList<>(eventos); }
-    public List<Venue> getVenues() { return new ArrayList<>(venues); }
-    public List<Usuario> getUsuarios() { return new ArrayList<>(usuarios); }
-
-    // ===== Getters =====
+    
+   
     public SimpleRepository getRepo() { return repo; }
     public Marketplace getMarketplace() { return marketplace; }
     public GestorFinanzas getGestorFinanzas() { return gestorFinanzas; }
     public GestorVentas getGestorVentas() { return gestorVentas; }
     public GestorTiquetes getGestorTiquetes() { return gestorTiquetes; }
     public Reporteador getReporteador() { return reporteador; }
+    public GestorEventos getGestorEventos() { return gestorEventos; }
+    public GestorUsuarios getGestorUsuarios() { return gestorUsuarios; }
+    public GestorReembolsos getGestorReembolsos() { return gestorReembolsos; }
+    public GestorPersistencia getGestorPersistencia() {return gestorPersistencia; }
 
+    
+    private void cargarDatosIniciales() {
+        System.out.println("Cargando datos iniciales de prueba...");
+        
+        // --- 1. USUARIOS ---
+        getGestorUsuarios().registrarComprador("juanito", "123", "Juan Pérez");
+        getGestorUsuarios().registrarOrganizador("live_nation", "456", "Live Nation Corp.");
+        getGestorUsuarios().registrarAdministrador("admin", "789", "Super Admin");
+        
+        Optional<Organizador> optOrg = getGestorUsuarios().buscarUsuarioPorLogin("live_nation")
+                                                          .filter(u -> u instanceof Organizador)
+                                                          .map(u -> (Organizador) u);
+        
+        Optional<Comprador> optComprador = getGestorUsuarios().buscarUsuarioPorLogin("juanito")
+                                                             .filter(u -> u instanceof Comprador)
+                                                             .map(u -> (Comprador) u);
+                                                             
+        Organizador org = optOrg.orElse(null);
+        Comprador comprador = optComprador.orElse(null);
+        
+        
+        if (org == null) {
+            System.err.println("❌ Error: No se pudo encontrar el Organizador 'live_nation'.");
+            return;
+        }
+        
+        Venue v1 = new Venue("V001", "Estadio Azteca", "Ciudad de México", 87000, true);
+        Venue v2 = new Venue("V002", "Movistar Arena", "Bogotá", 14000, true);
+        getGestorEventos().getVenues().add(v1); 
+        getGestorEventos().getVenues().add(v2);
+        
+        LocalDateTime date1 = LocalDateTime.of(2025, 12, 10, 20, 0);
+        LocalDateTime date2 = LocalDateTime.of(2026, 2, 25, 14, 0);
+        
+        Evento e1 = new Evento("E001", "Concierto de Shakira", date1, v1, org);
+        Evento e2 = new Evento("E002", "Festival Rock Al Parque", date2, v2, org);
+        
+        getGestorEventos().getEventos().add(e1); 
+        getGestorEventos().getEventos().add(e2);
+        
+        List<Ticket> todosTickets = new ArrayList<>();
+        
+        Localidad loc1a = new Localidad("L1A", "VIP", 500.00, 500, false);
+        Localidad loc1b = new Localidad("L1B", "General", 150.00, 5000, false);
+        e1.addLocalidad(loc1a);
+        e1.addLocalidad(loc1b);
+
+        todosTickets.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e1, loc1a, 500));
+        todosTickets.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e1, loc1b, 5000));
+        
+        Localidad loc2a = new Localidad("L2A", "Platea", 120.00, 2000, false);
+        Localidad loc2b = new Localidad("L2B", "Gradería", 50.00, 5000, false);
+        e2.addLocalidad(loc2a);
+        e2.addLocalidad(loc2b);
+
+        todosTickets.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e2, loc2a, 2000));
+        todosTickets.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e2, loc2b, 5000));
+
+        for (Ticket t : todosTickets) {
+            getRepo().addTicket(t);
+        }
+        
+        if (comprador != null && !todosTickets.isEmpty()) {
+            Ticket ticketToSell = todosTickets.get(0); 
+            getGestorTiquetes().venderTicket(ticketToSell, comprador, "Tarjeta de Prueba", "123"); 
+            comprador.depositarSaldo(1000.00); 
+            System.out.println("Ticket " + ticketToSell.getId() + " vendido y asignado a Juan Pérez. Saldo inicial: 1000.00");
+        }
+        
+        System.out.println("Carga de datos inicial completa. Listos para usar.");
+    }
+    
     @Override
     public String toString() {
+        
+        int numUsuarios = getGestorUsuarios().getUsuarios().size();
+        int numEventos = getGestorEventos().getEventos().size();
+        int numVenues = getGestorEventos().getVenues().size();
+        
+        int numTickets = repo.getTickets().size(); 
+
         return "BoletamasterSystem {" +
-                "usuarios=" + usuarios.size() +
-                ", eventos=" + eventos.size() +
-                ", venues=" + venues.size() +
-                ", tickets=" + repo.getTickets().size() +
+                "usuarios=" + numUsuarios +
+                ", eventos=" + numEventos +
+                ", venues=" + numVenues +
+                ", tickets=" + numTickets +
                 '}';
     }
 }

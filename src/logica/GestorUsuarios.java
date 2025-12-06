@@ -1,17 +1,31 @@
 package logica;
 
+import boletamaster.app.Sistema;
 import boletamaster.usuarios.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class GestorUsuarios {
+    
+    private final Sistema sistema; 
     private List<Usuario> usuarios;
     
-    public GestorUsuarios() {
-        this.usuarios = new ArrayList<>();
-        // Usuario administrador por defecto
-        usuarios.add(new Administrador("admin", "admin123", "Administrador Principal"));
+    public GestorUsuarios(Sistema sistema) {
+        this.sistema = sistema;
+        
+        @SuppressWarnings("unchecked")
+
+        List<Usuario> loadedUsers = (List<Usuario>) sistema.getCore()
+                                        .getGestorPersistencia()
+                                        .cargarDatos("usuarios.dat");
+        
+        if (loadedUsers != null && !loadedUsers.isEmpty()) {
+            this.usuarios = loadedUsers;
+        } else {
+            this.usuarios = new ArrayList<>();
+            usuarios.add(new Administrador("admin", "admin123", "Administrador Principal"));
+        }
     }
     
     public Comprador registrarComprador(String login, String password, String nombre) {
@@ -20,6 +34,7 @@ public class GestorUsuarios {
         }
         Comprador comprador = new Comprador(login, password, nombre);
         usuarios.add(comprador);
+        sistema.getRepo().addUsuario(comprador);
         return comprador;
     }
     
@@ -29,6 +44,7 @@ public class GestorUsuarios {
         }
         Organizador organizador = new Organizador(login, password, nombre);
         usuarios.add(organizador);
+        sistema.getRepo().addUsuario(organizador);
         return organizador;
     }
     
@@ -37,6 +53,7 @@ public class GestorUsuarios {
                       .filter(u -> u.getLogin().equals(login))
                       .findFirst();
     }
+    
     
     public Usuario autenticar(String login, String password) {
         Optional<Usuario> usuario = buscarUsuarioPorLogin(login);
@@ -55,6 +72,7 @@ public class GestorUsuarios {
         }
         Administrador administrador = new Administrador(login, password, nombre);
         usuarios.add(administrador);
+        sistema.getRepo().addUsuario(administrador);
         return administrador;
     }
 }

@@ -28,7 +28,7 @@ public class Evento implements Serializable {
         this.organizador = organizador;
         this.localidades = new ArrayList<>();
         this.tickets = new ArrayList<>();
-        this.ofertas = new ArrayList<>(); // ✅ inicialización
+        this.ofertas = new ArrayList<>(); 
         this.cancelado = false;
     }
 
@@ -51,7 +51,6 @@ public class Evento implements Serializable {
 
     public List<Ticket> getTickets() { return tickets; }
 
-    // ✅ Nuevo método requerido por GestorVentas
     public List<Oferta> getOfertas() {
         return ofertas;
     }

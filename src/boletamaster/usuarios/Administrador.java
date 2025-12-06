@@ -1,13 +1,15 @@
 package boletamaster.usuarios;
 
-import boletamaster.app.Sistema;
+import java.util.List;
 
+import boletamaster.app.Sistema;
 import boletamaster.tiquetes.Ticket;
 import boletamaster.tiquetes.TicketMultiple;
 import boletamaster.transacciones.Reembolso;
-import java.util.List;
 
 public class Administrador extends Usuario {
+	private static final long serialVersionUID = 1L;
+
 
     public Administrador(String login, String password, String nombre) {
         super(login, password, nombre);

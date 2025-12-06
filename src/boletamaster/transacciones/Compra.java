@@ -1,20 +1,16 @@
 package boletamaster.transacciones;
 
-import boletamaster.usuarios.Usuario;
-import boletamaster.tiquetes.Ticket;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import boletamaster.tiquetes.Ticket;
+import boletamaster.usuarios.Usuario;
 
 public class Compra extends Transaccion {
+	private static final long serialVersionUID = 1L;
+
     private final List<Ticket> tickets;  
 
-    // ✅ Constructor completo (tu versión original)
-    public Compra(Usuario usuario, double montoTotal, List<Ticket> tickets) {
-        super(usuario, montoTotal);
-        this.tickets = new ArrayList<>(tickets);
-    }
-
-    // ✅ Nuevo constructor simple (para Marketplace o ventas directas)
     public Compra(Usuario usuario, double montoTotal) {
         super(usuario, montoTotal);
         this.tickets = new ArrayList<>();

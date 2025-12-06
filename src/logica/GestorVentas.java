@@ -8,10 +8,6 @@ import boletamaster.usuarios.Comprador;
 
 import java.util.List;
 
-/**
- * GestorVentas: gestiona compras de tickets aplicando ofertas vigentes por localidad
- * y validando restricciones de transacción.
- */
 public class GestorVentas {
 
     private final GestorFinanzas gestorFinanzas;
@@ -24,10 +20,7 @@ public class GestorVentas {
         this.gestorFinanzas = gestorFinanzas;
     }
 
-    /**
-     * Procesa la compra de uno o varios tickets.
-     * Si hay ofertas vigentes para la localidad del ticket, aplica el descuento.
-     */
+    
     public Compra procesarCompra(Comprador comprador, List<Ticket> tickets, boolean usarSaldo) {
         if (comprador == null) throw new IllegalArgumentException("Comprador nulo");
         if (tickets == null || tickets.isEmpty()) throw new IllegalArgumentException("Lista de tickets vacía");
@@ -61,11 +54,7 @@ public class GestorVentas {
         return compra;
     }
 
-    /**
-     * Verifica restricciones de compra:
-     * - Máximo 10 tickets por transacción
-     * - Tickets deben estar disponibles y no vencidos
-     */
+
     private void verificarRestricciones(List<Ticket> tickets) {
         final int maxTickets = 10;
         if (tickets.size() > maxTickets)
@@ -79,9 +68,7 @@ public class GestorVentas {
         }
     }
 
-    /**
-     * Busca una oferta vigente que aplique a la localidad del ticket.
-     */
+
     private Oferta buscarOfertaVigente(Ticket t) {
         for (Oferta o : sistema.getRepo().getEventos().stream()
                 .flatMap(e -> e.getOfertas().stream())
@@ -93,9 +80,7 @@ public class GestorVentas {
         return null;
     }
 
-    /**
-     * Transfiere un ticket a otro usuario.
-     */
+
     public void transferirTicket(Ticket ticket,
                                  boletamaster.usuarios.Usuario actual,
                                  String password,

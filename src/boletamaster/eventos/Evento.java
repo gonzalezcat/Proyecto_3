@@ -16,8 +16,9 @@ public class Evento implements Serializable {
     private final Organizador organizador;
     private final List<Localidad> localidades;
     private final List<Ticket> tickets;
-    private final List<Oferta> ofertas; //
+    private final List<Oferta> ofertas; 
     private boolean cancelado;
+    private boolean publicado;
     private static final long serialVersionUID = 1L;
 
     public Evento(String id, String nombre, LocalDateTime fechaHora, Venue venue, Organizador organizador) {
@@ -30,6 +31,7 @@ public class Evento implements Serializable {
         this.tickets = new ArrayList<>();
         this.ofertas = new ArrayList<>(); 
         this.cancelado = false;
+        this.publicado = false;
     }
 
     public String getId() { return id; }
@@ -63,6 +65,14 @@ public class Evento implements Serializable {
         int total = 0;
         for (Localidad l : localidades) total += l.getCapacidad();
         return total;
+    }
+    
+    public boolean isPublicado() { 
+        return publicado; 
+    }
+
+    public void setPublicado(boolean publicado) { 
+        this.publicado = publicado; 
     }
 
     @Override

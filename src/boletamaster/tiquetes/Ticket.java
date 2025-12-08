@@ -43,7 +43,9 @@ public abstract class Ticket implements Serializable{
     public double getCuotaFija() { return cuotaFija; }
     public TicketEstado getEstado() { return estado; }
     public Usuario getPropietario() { return propietario; }
-    
+    public double getPrecioFinal() { 
+        return precioFinal(); 
+    }
     public void setEvento(Evento evento) {
 		this.evento = evento;
 	}

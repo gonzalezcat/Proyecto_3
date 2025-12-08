@@ -55,7 +55,9 @@ public class Sistema {
     
     public Evento registrarEvento(Organizador organizador, String nombre, 
                                 LocalDateTime fecha, Venue venue) {
-        return core.getGestorEventos().crearEvento(organizador, nombre, fecha, venue);
+    	Evento nuevoEvento = core.getGestorEventos().crearEvento(organizador, nombre, fecha, venue);
+    	core.getRepo().guardarEventos();        
+        return nuevoEvento;
     }
     
     public List<Evento> eventosActivosPorOrganizador(Organizador org) {
@@ -162,6 +164,11 @@ public class Sistema {
                 .orElse(null);
     }
     
+    public void setEventoPublicado(Evento e, boolean publicado) {
+        if (e == null) throw new IllegalArgumentException("Evento nulo.");
+        e.setPublicado(publicado); 
+        core.getRepo().guardarEventos();
+    }
     
     public BoletamasterSystem getCore() {
         return core;

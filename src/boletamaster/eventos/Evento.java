@@ -16,7 +16,7 @@ public class Evento implements Serializable {
     private final Organizador organizador;
     private final List<Localidad> localidades;
     private final List<Ticket> tickets;
-    private final List<Oferta> ofertas; 
+
     private boolean cancelado;
     private boolean publicado;
     private static final long serialVersionUID = 1L;
@@ -29,7 +29,6 @@ public class Evento implements Serializable {
         this.organizador = organizador;
         this.localidades = new ArrayList<>();
         this.tickets = new ArrayList<>();
-        this.ofertas = new ArrayList<>(); 
         this.cancelado = false;
         this.publicado = false;
     }
@@ -53,13 +52,7 @@ public class Evento implements Serializable {
 
     public List<Ticket> getTickets() { return tickets; }
 
-    public List<Oferta> getOfertas() {
-        return ofertas;
-    }
-
-    public void agregarOferta(Oferta o) {
-        if (o != null) ofertas.add(o);
-    }
+    
 
     public int limiteTickets() {
         int total = 0;

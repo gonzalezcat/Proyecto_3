@@ -35,22 +35,18 @@ public class BoletamasterSystem {
         this.repo = new SimpleRepository();
 
         Sistema facade = new Sistema(this);
-        
-        this.gestorPersistencia = new GestorPersistencia(facade);
-        
+        this.gestorPersistencia = new GestorPersistencia(facade);    
+        this.gestorPersistencia.cargarTodo();
         this.gestorFinanzas = new GestorFinanzas(facade);
         this.gestorVentas = new GestorVentas(facade, gestorFinanzas);
         this.gestorTiquetes = new GestorTiquetes(facade);
         this.reporteador = new Reporteador(facade, gestorFinanzas);
         this.gestorReembolsos = new GestorReembolsos(facade);
         this.marketplace = new Marketplace(facade);
-        
         this.gestorEventos = new GestorEventos(facade); 
         this.gestorUsuarios = new GestorUsuarios(facade); 
         
-        if (repo.getUsuarios().isEmpty()) {
-            cargarDatosIniciales();
-        }
+       
     }
 
     public static BoletamasterSystem getInstance() {

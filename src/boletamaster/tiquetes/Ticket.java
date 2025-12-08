@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import boletamaster.eventos.Evento;
 import boletamaster.eventos.Localidad;
-import boletamaster.eventos.Oferta;
 import boletamaster.usuarios.Usuario;
 
 public abstract class Ticket implements Serializable{
@@ -79,13 +78,7 @@ public abstract class Ticket implements Serializable{
         this.propietario = nuevoPropietario;
         this.estado = TicketEstado.TRANSFERIDO;
     }
-    public double precioConDescuento(Oferta oferta) {
-        if (oferta != null && oferta.estaVigente() && 
-            oferta.getLocalidad().equals(this.localidad)) {
-            return oferta.aplicarDescuento(precioFinal());
-        }
-        return precioFinal();
-    }
+    
     
     public boolean isImpreso() {
         return impreso;

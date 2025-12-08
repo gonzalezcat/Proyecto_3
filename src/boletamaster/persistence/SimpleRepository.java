@@ -1,9 +1,9 @@
 package boletamaster.persistence;
 
 import java.io.Serializable;
-import java.util.ArrayList; // Necesario para inicializar en caso de reinicio
+import java.util.ArrayList;
 import java.util.List;
-import java.io.File; // Necesario para la función de borrado
+import java.io.File;
 
 import boletamaster.eventos.Evento;
 import boletamaster.eventos.Venue;
@@ -108,19 +108,50 @@ public class SimpleRepository implements Serializable {
         DataManager.guardarLista(PersistenceConfig.USERS_FILE, usuarios);
     }
 
-   
+    public void setUsuarios(List<Usuario> usuarios) {
+        this.usuarios = usuarios;
+    }
+
+    public void setVenues(List<Venue> venues) {
+        this.venues = venues;
+    }
+
+    public void setEventos(List<Evento> eventos) {
+        this.eventos = eventos;
+    }
+
+    public void setTickets(List<Ticket> tickets) {
+        this.tickets = tickets;
+    }
+
+    public void setTransacciones(List<Object> transacciones) {
+        this.transacciones = transacciones;
+    }
+
+    public void setOfertas(List<Oferta> ofertas) {
+        this.ofertas = ofertas;
+    }
+
+    public void setLog(List<LogRegistro> log) {
+        this.log = log;
+    }
+    
     public void borrarArchivosDeDatos() {
-        String dataFolderPath = PersistenceConfig.DATA_FOLDER; 
+        String dataFolderPath = PersistenceConfig.DATA_FOLDER;
         File dataFolder = new File(dataFolderPath);
         
         if (dataFolder.exists() && dataFolder.isDirectory()) {
             boolean allDeleted = true;
-            for (File file : dataFolder.listFiles()) {
-                if (!file.delete()) {
-                    System.err.println("Error al borrar el archivo: " + file.getName());
-                    allDeleted = false;
+            File[] files = dataFolder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (!file.delete()) {
+                        System.err.println("Error al borrar el archivo: " + file.getName());
+                        allDeleted = false;
+                    }
                 }
             }
+            
             if (allDeleted) {
                 if (dataFolder.delete()) {
                     System.out.println("Carpeta de datos borrada: " + dataFolderPath);
@@ -133,5 +164,3 @@ public class SimpleRepository implements Serializable {
         }
     }
 }
-
-

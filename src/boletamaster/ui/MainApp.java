@@ -12,7 +12,6 @@ public class MainApp {
         Sistema sistema = new Sistema(core);
 
         SwingUtilities.invokeLater(() -> {
-            // --- CAMBIO CLAVE: Muestra WelcomeFrame ---
             new WelcomeFrame(sistema).setVisible(true);
         });
     }

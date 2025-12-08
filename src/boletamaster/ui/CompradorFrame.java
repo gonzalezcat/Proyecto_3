@@ -32,7 +32,6 @@ public class CompradorFrame extends JFrame {
         add(tabbedPane);
     }
 
-    // --- Pestaña 1: Perfil y Saldo ---
     private JPanel crearPanelPerfil() {
         JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -47,7 +46,6 @@ public class CompradorFrame extends JFrame {
         panel.add(new JLabel(comprador.getLogin()));
 
         panel.add(new JLabel("Saldo Disponible:"));
-        // Formato para el saldo (e.g., $100.00)
         JLabel lblSaldo = new JLabel(String.format("$%.2f", comprador.getSaldo()));
         lblSaldo.setFont(new Font("Arial", Font.BOLD, 14));
         panel.add(lblSaldo);
@@ -62,7 +60,6 @@ public class CompradorFrame extends JFrame {
         
         List<Ticket> tickets = sistema.obtenerTicketsPorPropietario(comprador);
         
-        // Clasificación de Tiquetes
         DefaultTableModel modeloVigentes = crearModeloTickets();
         DefaultTableModel modeloVencidos = crearModeloTickets();
         
@@ -85,9 +82,7 @@ public class CompradorFrame extends JFrame {
             }
         }
         
-        // Pestaña de Vigentes
         ticketTabs.addTab("Vigentes", crearPanelTabla(modeloVigentes, true));
-        // Pestaña de Vencidos
         ticketTabs.addTab("Vencidos", crearPanelTabla(modeloVencidos, false));
         
         panel.add(ticketTabs, BorderLayout.CENTER);
@@ -99,7 +94,7 @@ public class CompradorFrame extends JFrame {
         return new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Las celdas no son editables
+                return false; 
             }
         };
     }
@@ -108,7 +103,6 @@ public class CompradorFrame extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         JTable tabla = new JTable(modelo);
         
-        // Ocultar la columna del objeto Ticket (Índice 5)
         tabla.getColumnModel().getColumn(5).setMinWidth(0);
         tabla.getColumnModel().getColumn(5).setMaxWidth(0);
         tabla.getColumnModel().getColumn(5).setWidth(0);
@@ -133,14 +127,12 @@ public class CompradorFrame extends JFrame {
             return;
         }
 
-        // Lógica de impresión (simulación)
         StringBuilder sb = new StringBuilder("Imprimiendo Tiquetes:\n");
         DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
         
         for (int row : filasSeleccionadas) {
-            Ticket t = (Ticket) modelo.getValueAt(row, 5); // Obtener el objeto Ticket
+            Ticket t = (Ticket) modelo.getValueAt(row, 5); 
             sb.append("- ").append(t.getId()).append(" | Evento: ").append(t.getEvento().getNombre()).append("\n");
-            // Aquí iría la lógica real de impresión o generación de PDF.
         }
         
         JOptionPane.showMessageDialog(this, sb.toString(), "Simulación de Impresión", JOptionPane.INFORMATION_MESSAGE);
@@ -155,9 +147,7 @@ public class CompradorFrame extends JFrame {
         
         JButton btnIrMarketplace = new JButton("Ir al Marketplace");
         
-        // Simulación de Hyperlink: al hacer clic, abre la ventana de búsqueda de eventos.
         btnIrMarketplace.addActionListener(e -> {
-            // new MarketplaceFrame(sistema, comprador).setVisible(true); 
             JOptionPane.showMessageDialog(this, "Abriendo Marketplace (Pendiente de implementar).", "Navegación", JOptionPane.INFORMATION_MESSAGE);
         });
 

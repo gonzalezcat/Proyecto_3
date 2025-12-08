@@ -55,10 +55,10 @@ public class Sistema {
     }
     
     public Evento registrarEvento(Organizador organizador, String nombre, 
-                                LocalDateTime fecha, Venue venue) {
+    		LocalDateTime fecha, Venue venue) {
     	Evento nuevoEvento = core.getGestorEventos().crearEvento(organizador, nombre, fecha, venue);
-    	core.getRepo().guardarEventos();        
-        return nuevoEvento;
+    	core.getRepo().guardarEventos(); 
+    	return nuevoEvento;
     }
     
     public List<Evento> eventosActivosPorOrganizador(Organizador org) {
@@ -190,11 +190,13 @@ public class Sistema {
                 generarTicketSimple(nuevaLocalidad);
             }
         }
-        
+
         core.getRepo().guardarEventos();
+    	core.getRepo().guardarTickets(); 
+
     }
-    
+
     public BoletamasterSystem getCore() {
-        return core;
+    	return core;
     }
 }

@@ -3,12 +3,14 @@ package boletamaster.ui;
 import boletamaster.app.Sistema;
 import boletamaster.usuarios.Organizador;
 import boletamaster.eventos.Evento;
+import boletamaster.eventos.Localidad;
 import boletamaster.eventos.Venue;
 import boletamaster.tiquetes.Ticket;
 import boletamaster.tiquetes.TicketEstado;
 import boletamaster.tiquetes.TicketMultiple;
 
 import javax.swing.*;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ public class OrganizadorFrame extends JFrame {
     private final Sistema sistema;
     private final Organizador organizador;
     private JTabbedPane tabbedPane;
+    private JTable eventosTable; 
     private DefaultTableModel eventosModel;
     private DefaultTableModel venuesModel;
 
@@ -46,29 +49,38 @@ public class OrganizadorFrame extends JFrame {
         setupMenuBar();
     }
 
-    // --- PESTAÑA 1: GESTIÓN DE EVENTOS 
+    // --- PESTAÑA 1: GESTIÓN DE EVENTOS
     private JPanel createGestionEventosPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         
-        String[] columnas = {"ID", "Nombre", "Fecha", "Venue", "Tickets Disp.", "Publicado"}; 
-        eventosModel = new DefaultTableModel(columnas, 0) {
-             @Override
-             public boolean isCellEditable(int row, int column) { return false; }
+        eventosModel = new DefaultTableModel(new String[]{"ID", "Nombre", "Fecha", "Venue", "Tickets Disp.", "Publicado", "Objeto Evento"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 5; 
+            }
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 5) return Boolean.class; 
+                return super.getColumnClass(columnIndex);
+            }
         };
-        JTable eventosTable = new JTable(eventosModel);
+        eventosTable = new JTable(eventosModel);
+        
+        eventosTable.getColumnModel().getColumn(6).setMaxWidth(0);
+        eventosTable.getColumnModel().getColumn(6).setMinWidth(0);
+        eventosTable.getColumnModel().getColumn(6).setPreferredWidth(0);
+        
+        setupTablaEventosListener();
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btnCrearEvento = new JButton("Crear Nuevo Evento");
         JButton btnCrearLocalidad = new JButton("Crear Localidad/Tickets");
-        JButton btnPublicarEvento = new JButton("Publicar/Despublicar en Marketplace");
 
         btnCrearEvento.addActionListener(e -> new EventoCreationFrame(this, sistema, organizador, this::actualizarTablas).setVisible(true));
         btnCrearLocalidad.addActionListener(e -> gestionarLocalidadesTiquetes(eventosTable));
-        btnPublicarEvento.addActionListener(e -> JOptionPane.showMessageDialog(this, "Funcionalidad de Publicación Pendiente."));
         
         buttonPanel.add(btnCrearEvento);
         buttonPanel.add(btnCrearLocalidad);
-        buttonPanel.add(btnPublicarEvento);
         
         panel.add(buttonPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(eventosTable), BorderLayout.CENTER);
@@ -84,8 +96,7 @@ public class OrganizadorFrame extends JFrame {
             return;
         }
         
-        String idEvento = (String) table.getValueAt(filaSeleccionada, 0);
-        Evento evento = sistema.buscarEventoPorIdYOrganizador(idEvento, organizador);
+        Evento evento = (Evento) table.getValueAt(filaSeleccionada, 6);
 
         if (evento != null) {
             new LocalidadTicketCreationFrame(this, sistema, evento, this::actualizarTablas).setVisible(true);
@@ -95,14 +106,43 @@ public class OrganizadorFrame extends JFrame {
     }
 
 
+    private void setupTablaEventosListener() {
+        eventosModel.addTableModelListener(e -> {
+            if (e.getColumn() == 5) { 
+                int row = e.getFirstRow();
+                
+                Evento evento = (Evento) eventosModel.getValueAt(row, 6); 
+                Boolean publicado = (Boolean) eventosModel.getValueAt(row, 5); 
+
+                if (publicado && evento.getLocalidades().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "No puede publicar un evento sin localidades y tickets.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                    SwingUtilities.invokeLater(() -> eventosModel.setValueAt(false, row, 5));
+                    return;
+                }
+
+                try {
+                    sistema.setEventoPublicado(evento, publicado);
+                    
+                    String mensaje = publicado ? "publicado en el Marketplace" : "retirado del Marketplace";
+                    JOptionPane.showMessageDialog(this,
+                        "Evento '" + evento.getNombre() + "' ha sido " + mensaje + ".",
+                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error al cambiar estado: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    SwingUtilities.invokeLater(() -> eventosModel.setValueAt(!publicado, row, 5));
+                }
+            }
+        });
+    }
+
     // --- PESTAÑA 2
     private JPanel createGestionVenuesPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         
         String[] columnas = {"ID", "Nombre", "Ubicación", "Capacidad Máxima", "¿Aprobado?"};
         venuesModel = new DefaultTableModel(columnas, 0) {
-             @Override
-             public boolean isCellEditable(int row, int column) { return false; }
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
         };
         JTable venuesTable = new JTable(venuesModel);
         
@@ -120,12 +160,12 @@ public class OrganizadorFrame extends JFrame {
         return panel;
     }
 
-    // --- PESTAÑA 3
+    // --- PESTAÑA 3 
     private JPanel createReportesPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         
         JComboBox<Evento> cmbEventos = new JComboBox<>();
-        cmbEventos.addItem(null); // Opción por defecto
+        cmbEventos.addItem(null); 
         sistema.eventosActivosPorOrganizador(organizador).forEach(cmbEventos::addItem);
 
         JTextArea txtReporte = new JTextArea(15, 50);
@@ -167,31 +207,32 @@ public class OrganizadorFrame extends JFrame {
         
         for (Evento e : eventos) {
             int ticketsDisponibles = (int) sistema.getRepo().getTickets().stream()
-                                    .filter(t -> t.getEvento() != null && t.getEvento().getId().equals(e.getId()))
-                                    .count(); 
+                                             .filter(t -> t.getEvento() != null && t.getEvento().getId().equals(e.getId()))
+                                             .count();
             
             eventosModel.addRow(new Object[]{
-                e.getId(), 
-                e.getNombre(), 
-                e.getFechaHora().format(formatter), 
+                e.getId(),
+                e.getNombre(),
+                e.getFechaHora().format(formatter),
                 e.getVenue().getNombre(),
                 ticketsDisponibles,
-                e.isPublicado() ? "Sí" : "No" 
+                e.isPublicado(), 
+                e                    
             });
         }
     }
     
     private void actualizarTablaVenues() {
         venuesModel.setRowCount(0);
-        List<Venue> allVenues = sistema.getRepo().getVenues(); 
+        List<Venue> allVenues = sistema.getRepo().getVenues();
         
-        for (Venue v : allVenues) { 
+        for (Venue v : allVenues) {
             venuesModel.addRow(new Object[]{
-                v.getId(), 
-                v.getNombre(), 
-                v.getUbicacion(), 
-                v.getCapacidadMaxima(), 
-                v.isAprobado() ? "Sí" : "No" 
+                v.getId(),
+                v.getNombre(),
+                v.getUbicacion(),
+                v.getCapacidadMaxima(),
+                v.isAprobado() ? "Sí" : "No"
             });
         }
     }
@@ -201,8 +242,8 @@ public class OrganizadorFrame extends JFrame {
         txtReporte.append("--- REPORTE DE VENTAS PARA: " + evento.getNombre() + " ---\n");
         
         List<Ticket> ticketsDelEvento = sistema.getRepo().getTickets().stream()
-                                        .filter(t -> t.getEvento() != null && t.getEvento().getId().equals(evento.getId()))
-                                        .toList();
+                                            .filter(t -> t.getEvento() != null && t.getEvento().getId().equals(evento.getId()))
+                                            .toList();
         
         int vendidos = 0;
         int disponibles = 0;
@@ -234,6 +275,7 @@ public class OrganizadorFrame extends JFrame {
         txtReporte.append("\n");
         
     }
+    
     private void setupMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("Archivo");

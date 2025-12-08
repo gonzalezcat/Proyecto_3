@@ -1,8 +1,8 @@
 package logica;
 
 import boletamaster.app.Sistema;
-import boletamaster.eventos.Oferta;
-import boletamaster.tiquetes.*;
+import boletamaster.tiquetes.Ticket;
+import boletamaster.tiquetes.TicketEstado;
 import boletamaster.transacciones.Compra;
 import boletamaster.usuarios.Comprador;
 
@@ -31,10 +31,8 @@ public class GestorVentas {
 
         for (Ticket t : tickets) {
             double precio = t.precioFinal();
-            Oferta oferta = buscarOfertaVigente(t);
-            if (oferta != null) {
-                precio = oferta.aplicarDescuento(precio);
-            }
+            
+            
             montoTotal += precio;
         }
 
@@ -66,18 +64,6 @@ public class GestorVentas {
             if (t.ticketVencido())
                 throw new IllegalStateException("Ticket vencido: " + t.getId());
         }
-    }
-
-
-    private Oferta buscarOfertaVigente(Ticket t) {
-        for (Oferta o : sistema.getRepo().getEventos().stream()
-                .flatMap(e -> e.getOfertas().stream())
-                .toList()) {
-            if (o.getLocalidad().equals(t.getLocalidad()) && o.estaVigente()) {
-                return o;
-            }
-        }
-        return null;
     }
 
 

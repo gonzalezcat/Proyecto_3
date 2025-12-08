@@ -38,7 +38,6 @@ public class Oferta implements Serializable{
         this.contraOfertas = new ArrayList<>();
     }
 
-    // Constructor usado por Marketplace con solo Localidad y porcentaje
     public Oferta(Localidad loc, double porcentajeDescuento, LocalDateTime inicio, LocalDateTime fin) {
         this.id = java.util.UUID.randomUUID().toString();
         this.ticket = new TicketSimple(loc); // ticket concreto
@@ -83,7 +82,9 @@ public class Oferta implements Serializable{
         return precio * (1.0 - porcentajeDescuento);
     }
 
-    public static class ContraOferta {
+    public static class ContraOferta implements Serializable {
+        private static final long serialVersionUID = 1L; 
+        
         private final Usuario comprador;
         private final double precio;
         private final LocalDateTime fecha;

@@ -172,4 +172,20 @@ public class CompradorFrame extends JFrame {
 
         return panel;
     }
+	
+    private void setupMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("Archivo");
+        JMenuItem logoutItem = new JMenuItem("Cerrar Sesión");
+        
+        logoutItem.addActionListener(e -> logout());
+        fileMenu.add(logoutItem);
+        menuBar.add(fileMenu);
+        setJMenuBar(menuBar);
+    }
+    
+    private void logout() {
+        this.dispose();
+        new LoginFrame(sistema).setVisible(true);
+    }
 }

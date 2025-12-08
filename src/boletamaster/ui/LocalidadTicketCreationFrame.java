@@ -3,7 +3,6 @@ package boletamaster.ui;
 import boletamaster.app.Sistema;
 import boletamaster.eventos.Evento;
 import boletamaster.eventos.Localidad;
-import boletamaster.tiquetes.Ticket;
 import javax.swing.*;
 import java.awt.*;
 import java.util.UUID;
@@ -21,6 +20,7 @@ public class LocalidadTicketCreationFrame extends JDialog {
 
     public LocalidadTicketCreationFrame(JFrame owner, Sistema sistema, Evento evento, Runnable callback) {
         super(owner, "Crear Localidad y Tiquetes para: " + evento.getNombre(), true);
+        
         this.sistema = sistema;
         this.evento = evento;
         this.callback = callback;
@@ -29,6 +29,10 @@ public class LocalidadTicketCreationFrame extends JDialog {
         setSize(450, 350);
         setLocationRelativeTo(owner);
         
+        initComponents();
+    }
+    
+    private void initComponents() {
         // Formulario
         JPanel formPanel = new JPanel(new GridLayout(5, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -45,16 +49,15 @@ public class LocalidadTicketCreationFrame extends JDialog {
         formPanel.add(new JLabel("Capacidad Total:"));
         formPanel.add(txtCapacidad);
         formPanel.add(new JLabel("Tipo de Tiquete:"));
-        formPanel.add(chkEsNumerada);
-
-        // Botón
+        formPanel.add(chkEsNumerada); 
+        
         JButton btnCrear = new JButton("Crear Localidad y Generar Tiquetes");
         btnCrear.addActionListener(e -> crearLocalidadYTickets());
         
         add(formPanel, BorderLayout.CENTER);
         add(btnCrear, BorderLayout.SOUTH);
     }
-    
+
     private void crearLocalidadYTickets() {
         try {
             String nombre = txtNombreLocalidad.getText().trim();
@@ -63,29 +66,17 @@ public class LocalidadTicketCreationFrame extends JDialog {
             boolean esNumerada = chkEsNumerada.isSelected();
 
             if (nombre.isEmpty() || precio <= 0 || capacidad <= 0) {
-                throw new IllegalArgumentException("Verifique nombre, precio y capacidad.");
+                JOptionPane.showMessageDialog(this, "Verifique nombre, precio y capacidad.", "Error", JOptionPane.ERROR_MESSAGE);
+                return; 
             }
 
+            sistema.crearLocalidadYGenerarTickets(evento, nombre, precio, capacidad, esNumerada);
             
-            Localidad nuevaLocalidad = new Localidad(UUID.randomUUID().toString(), nombre, precio, capacidad, esNumerada);
-            evento.addLocalidad(nuevaLocalidad); 
-            
-            for (int i = 0; i < capacidad; i++) {
-                Ticket t;
-                if (esNumerada) {
-                    String asiento = nombre.substring(0, 1).toUpperCase() + String.format("%03d", i + 1);
-                    t = sistema.generarTicketNumerado(nuevaLocalidad, asiento);
-                } else {
-                    t = sistema.generarTicketSimple(nuevaLocalidad);
-                }
-                
-            }
-
-            JOptionPane.showMessageDialog(this, 
-                "Localidad '" + nombre + "' creada y " + capacidad + " tiquetes generados.", 
+            JOptionPane.showMessageDialog(this,
+                "Localidad '" + nombre + "' creada y " + capacidad + " tiquetes generados.",
                 "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 
-            callback.run(); 
+            callback.run();
             this.dispose();
 
         } catch (NumberFormatException e) {

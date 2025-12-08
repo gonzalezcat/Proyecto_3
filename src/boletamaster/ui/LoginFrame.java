@@ -22,7 +22,7 @@ public class LoginFrame extends JFrame {
         setTitle("BoletaMaster - Iniciar Sesión");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 250);
-        setLocationRelativeTo(null); 
+        setLocationRelativeTo(null);
         
         userField = new JTextField(15);
         passField = new JPasswordField(15);
@@ -85,11 +85,11 @@ public class LoginFrame extends JFrame {
             this.dispose(); 
             
             if (user instanceof Comprador c) {
-                new MainCompradorFrame(sistema, c).setVisible(true);
+                new CompradorFrame(sistema, c).setVisible(true);
             } else if (user instanceof Organizador o) {
-                new MainOrganizadorFrame(sistema, o).setVisible(true);
+                new OrganizadorFrame(sistema, o).setVisible(true); 
             } else if (user instanceof Administrador a) {
-                new MainAdministradorFrame(sistema, a).setVisible(true); 
+                new AdministradorFrame(sistema, a).setVisible(true); 
             }
         } else {
             JOptionPane.showMessageDialog(this, "Credenciales inválidas.", "Error", JOptionPane.ERROR_MESSAGE);

@@ -8,33 +8,19 @@ import java.util.Optional;
 
 public class GestorUsuarios {
     
-    private final Sistema sistema; 
-    private List<Usuario> usuarios;
+    private final Sistema sistema;  
     
     public GestorUsuarios(Sistema sistema) {
         this.sistema = sistema;
         
-        @SuppressWarnings("unchecked")
-
-        List<Usuario> loadedUsers = (List<Usuario>) sistema.getCore()
-                                        .getGestorPersistencia()
-                                        .cargarDatos("usuarios.dat");
-        
-        if (loadedUsers != null && !loadedUsers.isEmpty()) {
-            this.usuarios = loadedUsers;
-        } else {
-            this.usuarios = new ArrayList<>();
-            usuarios.add(new Administrador("admin", "admin123", "Administrador Principal"));
-        }
     }
     
     public Comprador registrarComprador(String login, String password, String nombre) {
-        if (buscarUsuarioPorLogin(login).isPresent()) {
+        if (buscarUsuarioPorLogin(login).isPresent()) { 
             throw new IllegalArgumentException("El usuario ya existe");
         }
         Comprador comprador = new Comprador(login, password, nombre);
-        usuarios.add(comprador);
-        sistema.getRepo().addUsuario(comprador);
+        sistema.getRepo().addUsuario(comprador); 
         return comprador;
     }
     
@@ -43,17 +29,15 @@ public class GestorUsuarios {
             throw new IllegalArgumentException("El usuario ya existe");
         }
         Organizador organizador = new Organizador(login, password, nombre);
-        usuarios.add(organizador);
         sistema.getRepo().addUsuario(organizador);
         return organizador;
     }
     
     public Optional<Usuario> buscarUsuarioPorLogin(String login) {
-        return usuarios.stream()
-                      .filter(u -> u.getLogin().equals(login))
-                      .findFirst();
+        return sistema.getRepo().getUsuarios().stream()
+                             .filter(u -> u.getLogin().equals(login))
+                             .findFirst();
     }
-    
     
     public Usuario autenticar(String login, String password) {
         Optional<Usuario> usuario = buscarUsuarioPorLogin(login);
@@ -64,14 +48,14 @@ public class GestorUsuarios {
     }
     
     public List<Usuario> getUsuarios() {
-        return new ArrayList<>(usuarios);
+        return sistema.getRepo().getUsuarios();
     }
+    
     public Administrador registrarAdministrador(String login, String password, String nombre) {
         if (buscarUsuarioPorLogin(login).isPresent()) {
             throw new IllegalArgumentException("El usuario ya existe");
         }
         Administrador administrador = new Administrador(login, password, nombre);
-        usuarios.add(administrador);
         sistema.getRepo().addUsuario(administrador);
         return administrador;
     }

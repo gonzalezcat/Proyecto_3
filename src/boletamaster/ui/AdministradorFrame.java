@@ -20,12 +20,12 @@ import javax.swing.SwingConstants;
 import boletamaster.app.Sistema;
 import boletamaster.usuarios.Administrador;
 
-public class MainAdministradorFrame extends JFrame {
+public class AdministradorFrame extends JFrame {
 	private static final long serialVersionUID = 1L;    
     private final Sistema sistema;
     private final Administrador administrador;
 
-    public MainAdministradorFrame(Sistema sistema, Administrador administrador) {
+    public AdministradorFrame(Sistema sistema, Administrador administrador) {
         this.sistema = sistema;
         this.administrador = administrador;
 

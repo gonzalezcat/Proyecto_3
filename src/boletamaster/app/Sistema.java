@@ -1,4 +1,5 @@
 package boletamaster.app;
+import java.util.UUID;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -167,6 +168,29 @@ public class Sistema {
     public void setEventoPublicado(Evento e, boolean publicado) {
         if (e == null) throw new IllegalArgumentException("Evento nulo.");
         e.setPublicado(publicado); 
+        core.getRepo().guardarEventos();
+    }
+    
+    public void crearLocalidadYGenerarTickets(Evento evento, String nombre, double precio, int capacidad, boolean esNumerada) {
+        if (evento == null) {
+            throw new IllegalArgumentException("El evento no puede ser nulo.");
+        }
+        if (nombre == null || nombre.trim().isEmpty() || precio <= 0 || capacidad <= 0) {
+            throw new IllegalArgumentException("Datos de localidad inválidos (nombre, precio o capacidad).");
+        }
+        Localidad nuevaLocalidad = new Localidad(UUID.randomUUID().toString(), nombre, precio, capacidad, esNumerada);
+        evento.addLocalidad(nuevaLocalidad); 
+        
+        for (int i = 0; i < capacidad; i++) {
+            if (esNumerada) {
+                String asiento = nombre.substring(0, 1).toUpperCase() + String.format("%03d", i + 1);
+                
+                generarTicketNumerado(nuevaLocalidad, asiento); 
+            } else {
+                generarTicketSimple(nuevaLocalidad);
+            }
+        }
+        
         core.getRepo().guardarEventos();
     }
     

@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainOrganizadorFrame extends JFrame {
+public class OrganizadorFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
     private final Sistema sistema;
@@ -27,7 +27,7 @@ public class MainOrganizadorFrame extends JFrame {
     private DefaultTableModel venuesModel;
 
 
-    public MainOrganizadorFrame(Sistema sistema, Organizador organizador) {
+    public OrganizadorFrame(Sistema sistema, Organizador organizador) {
         this.sistema = sistema;
         this.organizador = organizador;
 
@@ -234,8 +234,19 @@ public class MainOrganizadorFrame extends JFrame {
         txtReporte.append("\n");
         
     }
-
-    // --- Menú y Logout (Se mantiene) ---
-    private void setupMenuBar() { /* ... */ }
-    private void logout() { /* ... */ }
+    private void setupMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("Archivo");
+        JMenuItem logoutItem = new JMenuItem("Cerrar Sesión");
+        
+        logoutItem.addActionListener(e -> logout());
+        fileMenu.add(logoutItem);
+        menuBar.add(fileMenu);
+        setJMenuBar(menuBar);
+    }
+    
+    private void logout() {
+        this.dispose();
+        new LoginFrame(sistema).setVisible(true);
+    }
 }

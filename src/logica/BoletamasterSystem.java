@@ -45,9 +45,11 @@ public class BoletamasterSystem {
         this.marketplace = new Marketplace(facade);
         this.gestorEventos = new GestorEventos(facade); 
         this.gestorUsuarios = new GestorUsuarios(facade); 
-        
-       
+        this.cargarDatosIniciales();
+
     }
+
+        
 
     public static BoletamasterSystem getInstance() {
         if (instance == null) {
@@ -72,77 +74,84 @@ public class BoletamasterSystem {
     public GestorReembolsos getGestorReembolsos() { return gestorReembolsos; }
     public GestorPersistencia getGestorPersistencia() {return gestorPersistencia; }
 
-    
     private void cargarDatosIniciales() {
         System.out.println("Cargando datos iniciales de prueba...");
-        
+
         getGestorUsuarios().registrarComprador("juanito", "123", "Juan Pérez");
         getGestorUsuarios().registrarOrganizador("live_nation", "456", "Live Nation Corp.");
         getGestorUsuarios().registrarAdministrador("admin", "789", "Super Admin");
-        
-        Optional<Organizador> optOrg = getGestorUsuarios().buscarUsuarioPorLogin("live_nation")
-                                                         .filter(u -> u instanceof Organizador)
-                                                         .map(u -> (Organizador) u);
-        
-        Optional<Comprador> optComprador = getGestorUsuarios().buscarUsuarioPorLogin("juanito")
-                                                              .filter(u -> u instanceof Comprador)
-                                                              .map(u -> (Comprador) u);
-                                                              
-        Organizador org = optOrg.orElse(null);
-        Comprador comprador = optComprador.orElse(null);
-        
+
+        Organizador org = (Organizador) getGestorUsuarios()
+                .buscarUsuarioPorLogin("live_nation").orElse(null);
+
+        Comprador comprador = (Comprador) getGestorUsuarios()
+                .buscarUsuarioPorLogin("juanito").orElse(null);
+
         if (org == null) {
-            System.err.println("❌ Error: No se pudo encontrar el Organizador 'live_nation'.");
+            System.err.println("❌ No existe organizador 'live_nation'.");
             return;
         }
-        
+
         Venue v1 = new Venue("V001", "Estadio Azteca", "Ciudad de México", 87000, true);
         Venue v2 = new Venue("V002", "Movistar Arena", "Bogotá", 14000, true);
-        
-        getGestorEventos().agregarVenue(v1); 
-        getGestorEventos().agregarVenue(v2);
-        
-        LocalDateTime date1 = LocalDateTime.of(2025, 12, 10, 20, 0);
-        LocalDateTime date2 = LocalDateTime.of(2026, 2, 25, 14, 0);
-        
-        Evento e1 = getGestorEventos().crearEvento(org, "Concierto de Shakira", date1, v1);
-        Evento e2 = getGestorEventos().crearEvento(org, "Festival Rock Al Parque", date2, v2);
 
-        List<Ticket> ticketsE1 = new ArrayList<>();
+        getGestorEventos().agregarVenue(v1);
+        getGestorEventos().agregarVenue(v2);
+
+        Evento e1 = getGestorEventos().crearEvento(
+                org, "Concierto de Shakira",
+                LocalDateTime.of(2025, 12, 10, 20, 0), v1
+        );
+
+        Evento e2 = getGestorEventos().crearEvento(
+                org, "Festival Rock Al Parque",
+                LocalDateTime.of(2026, 2, 25, 14, 0), v2
+        );
+
+        // --- LOCALIDADES ---
         Localidad loc1a = new Localidad("L1A", "VIP", 500.00, 500, false);
         Localidad loc1b = new Localidad("L1B", "General", 150.00, 5000, false);
+
         e1.addLocalidad(loc1a);
         e1.addLocalidad(loc1b);
-        
-        ticketsE1.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e1, loc1a, 500));
-        ticketsE1.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e1, loc1b, 5000));
-        
-        List<Ticket> ticketsE2 = new ArrayList<>();
+
         Localidad loc2a = new Localidad("L2A", "Platea", 120.00, 2000, false);
         Localidad loc2b = new Localidad("L2B", "Gradería", 50.00, 5000, false);
+
         e2.addLocalidad(loc2a);
         e2.addLocalidad(loc2b);
 
+        List<Ticket> ticketsE1 = new ArrayList<>();
+        ticketsE1.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e1, loc1a, 500));
+        ticketsE1.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e1, loc1b, 5000));
+
+        List<Ticket> ticketsE2 = new ArrayList<>();
         ticketsE2.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e2, loc2a, 2000));
         ticketsE2.addAll(getGestorTiquetes().generarTicketsParaLocalidad(e2, loc2b, 5000));
 
-        
-        for (Ticket t : ticketsE1) { t.setEvento(e1); getRepo().addTicket(t); }
-        for (Ticket t : ticketsE2) { t.setEvento(e2); getRepo().addTicket(t); }
-        
+        ticketsE1.forEach(t -> getRepo().addTicket(t));
+        ticketsE2.forEach(t -> getRepo().addTicket(t));
+
         if (comprador != null && !ticketsE1.isEmpty()) {
-            Ticket ticketToSell = ticketsE1.get(0); 
-            getGestorTiquetes().venderTicket(ticketToSell, comprador, "Tarjeta de Prueba", "123"); 
-            comprador.depositarSaldo(1000.00); 
-            
-            getRepo().guardarUsuarios(); 
-            getRepo().guardarTickets(); 
-            
-            System.out.println("Ticket " + ticketToSell.getId() + " vendido y asignado a Juan Pérez. Saldo inicial: 1000.00");
+            Ticket t = ticketsE1.get(0);
+
+            getGestorTiquetes().venderTicket(
+                    t, comprador,
+                    "Tarjeta Prueba", "123"
+            );
+
+            comprador.depositarSaldo(1000.00);
+
+            getRepo().guardarUsuarios();
+            getRepo().guardarTickets();
+
+            System.out.println("Ticket vendido a Juan Pérez. Saldo 1000.");
         }
+
+        System.out.println("Datos iniciales cargados correctamente.");
         
-        System.out.println("Carga de datos inicial completa. Listos para usar.");
     }
+
     
     @Override
     public String toString() {
